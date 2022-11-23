@@ -213,26 +213,27 @@ def makeBestGuess(wordsRemaining, wordList):
 
         # make our buckets as a dictionary
         # the keys will be the score, the value will be a list of words
-        buckets = {}
+        buckets = []
 
         # go through all the possible solutions
         for solution in wordsRemaining:
 
             # find out what the score would be
             score = scoreGuess(guess, solution)
-
-            # if we've already found a word with that score, add one to the bucket
-            if score in buckets.keys():
-                buckets[score] += 1
-
-            # otherwise, set that bucket equal to 1
-            else:
-                buckets[score] = 1
+            
+            # update our "buckets"
+            found = False
+            for bucket in buckets:
+                if bucket[0] == score:
+                    bucket[1] += 1
+                    found = True
+            if not found:
+                buckets.append([score, 1])
 
         # calculate the average for this guess
         total = 0
         for bucket in buckets:
-            total += buckets[bucket]
+            total += bucket[1]
 
         average = total / len(buckets)
         
