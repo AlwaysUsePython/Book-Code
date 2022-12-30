@@ -1,5 +1,120 @@
 import random
 
+# This is the key function
+# Our Strategy:
+# 1) For every word that we could GUESS, figure out what
+# the result would be for every word that could be the SOLUTION
+# 2) Group those SOLUTIONS into "buckets" of similar scores
+# 3) Guess the word with the smallest average bucket size!
+
+def makeBestGuess(wordsRemaining, wordList):
+    # keep track of our lowest average!
+    lowestAverage = len(wordsRemaining)
+    bestGuess = "tests"
+
+    # Go through all the possible guesses
+    for guess in wordList:
+
+        # make our buckets as a dictionary
+        # the keys will be the score, the value will be a list of words
+        buckets = []
+
+        # go through all the possible solutions
+        for solution in wordsRemaining:
+
+            # find out what the score would be
+            score = scoreGuess(guess, solution)
+
+            # update our "buckets"
+            found = False
+            for bucket in buckets:
+                if bucket[0] == score:
+                    bucket[1] += 1
+                    found = True
+            if not found:
+                buckets.append([score, 1])
+
+        # calculate the average for this guess
+        total = 0
+        for bucket in buckets:
+            total += bucket[1]
+
+        average = total / len(buckets)
+
+        # see if we save the word
+        if average < lowestAverage:
+            lowestAverage = average
+            bestGuess = guess
+
+        # if the word is a remaining solution, give it priority
+        elif guess in wordsRemaining and average == lowestAverage:
+            lowestAverage = average
+            bestGuess = guess
+
+    return [bestGuess, lowestAverage]
+
+
+# here's the scoring function
+def scoreGuess(word, chosenWord):
+    # set up a score variable and a variable to keep track of what has been scored already
+    score = [0, 0, 0, 0, 0]
+    scored = ""
+
+    # start by doing the greens
+    for letter in range(len(word)):
+        if word[letter] == (chosenWord[letter]):
+            score[letter] = 3
+            scored += word[letter]
+
+    # now do yellows
+    for letter in range(len(word)):
+        if word[letter] in chosenWord:
+            # make sure we don't double score letters!
+            if countLetter(scored, word[letter]) - countLetter(chosenWord, word[letter]) != 0:
+                if score[letter] == 0:
+                    score[letter] = 2
+                    scored += word[letter]
+
+    for i in range(len(score)):
+        if score[i] == 0:
+            score[i] = 1
+
+    # convert the score array to a readable string
+    scoreStr = ""
+    for num in score:
+        if num == 1:
+            scoreStr += "_"
+        elif num == 2:
+            scoreStr += "Y"
+        else:
+            scoreStr += "G"
+
+    return scoreStr
+
+
+# A helpful function for scoreGuess()
+def countLetter(word, letter):
+    count = 0
+    for character in word:
+        if character == letter:
+            count += 1
+    return count
+
+
+# This will let us keep playing a game
+def updateWordsRemaining(wordsRemaining, guess, score):
+    # the strategy: go through wordsRemaining, and for every word, see if it would have 
+    # given our guess the same score as the solution word did.
+
+    stillPossible = []
+
+    for possibleSolution in wordsRemaining:
+        if scoreGuess(guess, possibleSolution) == score:
+            stillPossible.append(possibleSolution)
+
+    return stillPossible
+
+
 # To start, let's load in the official Wordle word list
 wordList = ['aback', 'abase', 'abate', 'abbey', 'abbot', 'abhor', 'abide', 'abled', 'abode', 'abort', 'about', 'above',
             'abuse', 'abyss', 'acorn', 'acrid', 'actor', 'acute', 'adage', 'adapt', 'adept', 'admin', 'admit', 'adobe',
@@ -195,121 +310,6 @@ wordList = ['aback', 'abase', 'abate', 'abbey', 'abbot', 'abhor', 'abide', 'able
             'wound', 'woven', 'wrack', 'wrath', 'wreak', 'wreck', 'wrest', 'wring', 'wrist', 'write', 'wrong', 'wrote',
             'wrung', 'wryly', 'yacht', 'yearn', 'yeast', 'yield', 'young', 'youth', 'zebra', 'zesty', 'zonal']
 
-# This is the key function
-# Our Strategy:
-# 1) For every word that we could GUESS, figure out what
-# the result would be for every word that could be the SOLUTION
-# 2) Group those SOLUTIONS into "buckets" of similar scores
-# 3) Guess the word with the smallest average bucket size!
-
-def makeBestGuess(wordsRemaining, wordList):
-
-    # keep track of our lowest average!
-    lowestAverage = len(wordsRemaining)
-    bestGuess = "tests"
-
-    # Go through all the possible guesses
-    for guess in wordList:
-
-        # make our buckets as a dictionary
-        # the keys will be the score, the value will be a list of words
-        buckets = []
-
-        # go through all the possible solutions
-        for solution in wordsRemaining:
-
-            # find out what the score would be
-            score = scoreGuess(guess, solution)
-            
-            # update our "buckets"
-            found = False
-            for bucket in buckets:
-                if bucket[0] == score:
-                    bucket[1] += 1
-                    found = True
-            if not found:
-                buckets.append([score, 1])
-
-        # calculate the average for this guess
-        total = 0
-        for bucket in buckets:
-            total += bucket[1]
-
-        average = total / len(buckets)
-        
-        # see if we save the word
-        if average < lowestAverage:
-            lowestAverage = average
-            bestGuess = guess
-        
-        # if the word is a remaining solution, give it priority
-        elif guess in wordsRemaining and average == lowestAverage:
-            lowestAverage = average
-            bestGuess = guess
-    
-    return [bestGuess, lowestAverage]
-
-
-# here's the scoring function
-def scoreGuess(word, chosenWord):
-    # set up a score variable and a variable to keep track of what has been scored already
-    score = [0, 0, 0, 0, 0]
-    scored = ""
-
-    # start by doing the greens
-    for letter in range(len(word)):
-        if word[letter] == (chosenWord[letter]):
-            score[letter] = 3
-            scored += word[letter]
-    
-    # now do yellows
-    for letter in range(len(word)):
-        if word[letter] in chosenWord:
-            # make sure we don't double score letters!
-            if countLetter(scored, word[letter]) - countLetter(chosenWord, word[letter]) != 0:
-                if score[letter] == 0:
-                    score[letter] = 2
-                    scored += word[letter]
-
-    for i in range(len(score)):
-        if score[i] == 0:
-            score[i] = 1
-    
-    # convert the score array to a readable string
-    scoreStr = ""
-    for num in score:
-        if num == 1:
-            scoreStr += "_"
-        elif num == 2:
-            scoreStr += "Y"
-        else:
-            scoreStr += "G"
-
-    return scoreStr
-
-# A helpful function for scoreGuess()
-def countLetter(word, letter):
-    count = 0 
-    for character in word:
-        if character == letter:
-            count += 1
-    return count
-
-
-# This will let us keep playing a game
-def updateWordsRemaining(wordsRemaining, guess, score):
-    # the strategy: go through wordsRemaining, and for every word, see if it would have 
-    # given our guess the same score as the solution word did.
-
-    stillPossible = []
-
-    for possibleSolution in wordsRemaining:
-        if scoreGuess(guess, possibleSolution) == score:
-            stillPossible.append(possibleSolution)
-    
-    return stillPossible
-
-
 wordsRemaining = wordList
 
 print("Before we start, do you want to set the solution or pick a random one?")
@@ -320,8 +320,8 @@ if choice == "set":
     print()
     print()
 else:
-    print("I have chosen a solution from the list!") 
-    solution = wordList[random.randint(0, len(wordList)-1)]
+    print("I have chosen a solution from the list!")
+    solution = wordList[random.randint(0, len(wordList) - 1)]
     print()
     print()
 
@@ -335,7 +335,8 @@ while not guessed:
 
     else:
         computerSuggestion = makeBestGuess(wordsRemaining, wordList)
-        print("My suggestion: \""+computerSuggestion[0]+"\" which averages " + str(int(computerSuggestion[1]*100)/100) + " words per group!")
+        print("My suggestion: \"" + computerSuggestion[0] + "\" which averages " + str(
+            int(computerSuggestion[1] * 100) / 100) + " words per group!")
 
     guess = input("so what do you choose? ")
     score = scoreGuess(guess, solution)
@@ -351,7 +352,7 @@ while not guessed:
         print()
         if len(wordsRemaining) < 100:
             for word in wordsRemaining:
-                print(word, end = " ")
+                print(word, end=" ")
             print()
     print()
 

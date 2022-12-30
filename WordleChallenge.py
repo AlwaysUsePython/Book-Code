@@ -1,6 +1,88 @@
 import random
 
-# To start, let's load in the official Wordle word list
+# This is the key function that YOU have to write!
+# Our Strategy:
+# 1) For every word that we could GUESS, figure out what
+# the result would be for every word that could be the SOLUTION
+# 2) Group those SOLUTIONS into "buckets" of similar scores
+# 3) Guess the word with the smallest average bucket size OR guess the word with the smallest worst case OR
+# any other metric you want to test!
+
+def makeBestGuess(wordsRemaining, wordList):
+
+    ## RIGHT NOW, THIS IS JUST RANDOMLY PICKING A WORD!
+    ## IT'S YOUR JOB TO REWRITE THIS FUNCTION
+
+    randomNum = random.randint(0, len(wordsRemaining)-1)
+
+    return wordsRemaining[randomNum]
+
+# Everything else has been written already! This includes:
+# 1) a scoreGuess(guess, solution) function that will give the correct score
+# NOTE: the score formats are strings with G for green, Y for yellow, and _ for grey
+# 2) The fully functioning game! Once makeBestGuess() is finished, hit run and have the computer play Wordle!
+
+
+# here's the scoring function
+def scoreGuess(word, chosenWord):
+    # set up a score variable and a variable to keep track of what has been scored already
+    score = [0, 0, 0, 0, 0]
+    scored = ""
+
+    # start by doing the greens
+    for letter in range(len(word)):
+        if word[letter] == (chosenWord[letter]):
+            score[letter] = 3
+            scored += word[letter]
+    
+    # now do yellows
+    for letter in range(len(word)):
+        if word[letter] in chosenWord:
+            # make sure we don't double score letters!
+            if countLetter(scored, word[letter]) - countLetter(chosenWord, word[letter]) != 0:
+                if score[letter] == 0:
+                    score[letter] = 2
+                    scored += word[letter]
+
+    for i in range(len(score)):
+        if score[i] == 0:
+            score[i] = 1
+    
+    # convert the score array to a readable string
+    scoreStr = ""
+    for num in score:
+        if num == 1:
+            scoreStr += "_"
+        elif num == 2:
+            scoreStr += "Y"
+        else:
+            scoreStr += "G"
+
+    return scoreStr
+
+# A helpful function for scoreGuess()
+def countLetter(word, letter):
+    count = 0 
+    for character in word:
+        if character == letter:
+            count += 1
+    return count
+
+
+# This will let us keep playing a game
+def updateWordsRemaining(wordsRemaining, guess, score):
+    # the strategy: go through wordsRemaining, and for every word, see if it would have 
+    # given our guess the same score as the solution word did.
+
+    stillPossible = []
+
+    for possibleSolution in wordsRemaining:
+        if scoreGuess(guess, possibleSolution) == score:
+            stillPossible.append(possibleSolution)
+    
+    return stillPossible
+
+# To start with building the actual game, let's load in the official Wordle word list
 wordList = ['aback', 'abase', 'abate', 'abbey', 'abbot', 'abhor', 'abide', 'abled', 'abode', 'abort', 'about', 'above',
             'abuse', 'abyss', 'acorn', 'acrid', 'actor', 'acute', 'adage', 'adapt', 'adept', 'admin', 'admit', 'adobe',
             'adopt', 'adore', 'adorn', 'adult', 'affix', 'afire', 'afoot', 'afoul', 'after', 'again', 'agape', 'agate',
@@ -195,131 +277,65 @@ wordList = ['aback', 'abase', 'abate', 'abbey', 'abbot', 'abhor', 'abide', 'able
             'wound', 'woven', 'wrack', 'wrath', 'wreak', 'wreck', 'wrest', 'wring', 'wrist', 'write', 'wrong', 'wrote',
             'wrung', 'wryly', 'yacht', 'yearn', 'yeast', 'yield', 'young', 'youth', 'zebra', 'zesty', 'zonal']
 
-# This is the key function that YOU have to write!
-# Our Strategy:
-# 1) For every word that we could GUESS, figure out what
-# the result would be for every word that could be the SOLUTION
-# 2) Group those SOLUTIONS into "buckets" of similar scores
-# 3) Guess the word with the smallest average bucket size OR guess the word with the smallest worst case OR
-# any other metric you want to test!
+def main():
+    wordsRemaining = wordList
 
-def makeBestGuess(wordsRemaining, wordList):
+    print("Before we start, do you want to set the solution or pick a random one?")
 
-    ## FILL IN THIS CODE HERE!!
-
-    pass
-
-# Everything else has been written already! This includes:
-# 1) a scoreGuess(guess, solution) function that will give the correct score
-# NOTE: the score formats are strings with G for green, Y for yellow, and _ for grey
-# 2) The fully functioning game! Once makeBestGuess() is finished, hit run and have the computer play Wordle!
-
-
-# here's the scoring function
-def scoreGuess(word, chosenWord):
-    # set up a score variable and a variable to keep track of what has been scored already
-    score = [0, 0, 0, 0, 0]
-    scored = ""
-
-    # start by doing the greens
-    for letter in range(len(word)):
-        if word[letter] == (chosenWord[letter]):
-            score[letter] = 3
-            scored += word[letter]
-    
-    # now do yellows
-    for letter in range(len(word)):
-        if word[letter] in chosenWord:
-            # make sure we don't double score letters!
-            if countLetter(scored, word[letter]) - countLetter(chosenWord, word[letter]) != 0:
-                if score[letter] == 0:
-                    score[letter] = 2
-                    scored += word[letter]
-
-    for i in range(len(score)):
-        if score[i] == 0:
-            score[i] = 1
-    
-    # convert the score array to a readable string
-    scoreStr = ""
-    for num in score:
-        if num == 1:
-            scoreStr += "_"
-        elif num == 2:
-            scoreStr += "Y"
-        else:
-            scoreStr += "G"
-
-    return scoreStr
-
-# A helpful function for scoreGuess()
-def countLetter(word, letter):
-    count = 0 
-    for character in word:
-        if character == letter:
-            count += 1
-    return count
-
-
-# This will let us keep playing a game
-def updateWordsRemaining(wordsRemaining, guess, score):
-    # the strategy: go through wordsRemaining, and for every word, see if it would have 
-    # given our guess the same score as the solution word did.
-
-    stillPossible = []
-
-    for possibleSolution in wordsRemaining:
-        if scoreGuess(guess, possibleSolution) == score:
-            stillPossible.append(possibleSolution)
-    
-    return stillPossible
-
-
-wordsRemaining = wordList
-
-print("Before we start, do you want to set the solution or pick a random one?")
-choice = input("(set/random) ")
-if choice == "set":
-    solution = input("What is your word? ")
-    print("Solution is", solution)
-    print()
-    print()
-else:
-    print("I have chosen a solution from the list!") 
-    solution = wordList[random.randint(0, len(wordList)-1)]
-    print()
-    print()
-
-guessed = False
-guessCounter = 0
-while not guessed:
-    guessCounter += 1
-
-    if wordsRemaining == wordList:
-        print("My suggestion: \"trace\" which averages 15.43 words per group!")
-
-    else:
-        computerSuggestion = makeBestGuess(wordsRemaining, wordList)
-        print("My suggestion: \""+computerSuggestion[0]+"\" which averages " + str(int(computerSuggestion[1]*100)/100) + " words per group!")
-
-    guess = input("so what do you choose? ")
-    score = scoreGuess(guess, solution)
-    print(score)
-    wordsRemaining = updateWordsRemaining(wordsRemaining, guess, score)
-    print()
-
-    if guess == solution:
-        print("Yaaaay! We did it in", guessCounter, "guesses!")
-        guessed = True
-    else:
-        print("Number of words remaining:", len(wordsRemaining))
+    # Print out a nice error message if input doesn't work (user needs to set terminal to interactive mode)
+    try:
+        choice = input("(set/random) ")
+    except:
         print()
-        if len(wordsRemaining) < 100:
-            for word in wordsRemaining:
-                print(word, end = " ")
-            print()
-    print()
+        print("WARNING!!!!!!!")
+        print("It looks like \"Interactive Mode\" isn't turned on. Try hitting the switch above the top of the console that says \"Interactive\"")
+        return
 
+    if choice == "set":
+        solution = input("What is your word? ")
+        print("Solution is", solution)
+        print()
+        print()
+    else:
+        print("I have chosen a solution from the list!")
+        solution = wordList[random.randint(0, len(wordList)-1)]
+        print()
+        print()
+
+    guessed = False
+    guessCounter = 0
+    while not guessed:
+        guessCounter += 1
+
+
+        # It takes a long time to do operations with the full word list, so if it's the first guess we will just suggest "trace"
+        # This word averages 15.43 words per bucket, which is what our algorithm finds to be the best option
+        if wordsRemaining == wordList:
+            print("My suggestion: \"trace\"")
+
+        else:
+            computerSuggestion = makeBestGuess(wordsRemaining, wordList)
+            print("My suggestion: \""+computerSuggestion+"\"")
+
+        guess = input("so what do you choose? ")
+        score = scoreGuess(guess, solution)
+        print(score)
+        wordsRemaining = updateWordsRemaining(wordsRemaining, guess, score)
+        print()
+
+        if guess == solution:
+            print("Yaaaay! We did it in", guessCounter, "guesses!")
+            guessed = True
+        else:
+            print("Number of words remaining:", len(wordsRemaining))
+            print()
+            if len(wordsRemaining) < 100:
+                for word in wordsRemaining:
+                    print(word, end = " ")
+                print()
+        print()
+
+main()
 
 
 
