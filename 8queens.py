@@ -64,8 +64,12 @@ def printBoard(board):
 
 
 # RUN THE PROGRAM UNTIL WE GET LUCKY
+# This will randomly place 8 queens until we get a position where none can take each other
+# This may take a while...
+counter = 0
 success = False
 while not success:
+    counter += 1
     testBoard = randomlyPlace8Queens()
 
     legal = testBoard[1]
@@ -80,3 +84,5 @@ while not success:
         print("As expected, some of the queens can take each other.")
     print()
 
+
+print("That took", counter, "tries")
